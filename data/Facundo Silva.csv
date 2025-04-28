@@ -1,0 +1,3 @@
+tipo,subtipo,fecha,monto,referencia,cuotas,dolares
+Ingreso,Fijo,2025-04-28,1100000.0,Sueldo,1,False
+Gasto,Tarjeta,2025-04-28,6187.675,Spotify,1,True
