@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import os
-import requests
 from datetime import datetime
+import requests
 
 # ---------- CONFIGURACIÓN DE PÁGINA ----------
 st.set_page_config(page_title="Gestor de Cuentas Personales - Bolso Company", layout="wide")
@@ -82,8 +82,8 @@ def login():
                 st.session_state["usuario_actual"] = usuario
                 if recordar:
                     guardar_credenciales_guardadas(usuario, contraseña)
+                st.session_state["pantalla_actual"] = "menu"  # Cambiar el estado a "menu"
                 st.success("Inicio de sesión exitoso.")
-                st.session_state["pantalla_actual"] = "menu"  # Cambiar el estado para que se muestre el menú
             else:
                 st.error("Usuario o contraseña incorrectos.")
 
@@ -229,5 +229,19 @@ def menu():
 
     if opciones == "Cerrar Sesión":
         st.session_state["sesion_iniciada"] = False
-        st.session_state["pantalla_actual"] = "login"  # Cambiar el estado a la pantalla de login
+        st.session_state["pantalla_actual"] = "login"
         st.success("Has cerrado sesión.")
+        return
+
+# ---------- FLUJO PRINCIPAL ----------
+if "sesion_iniciada" not in st.session_state:
+    st.session_state["sesion_iniciada"] = False
+
+if "pantalla_actual" not in st.session_state:
+    st.session_state["pantalla_actual"] = "login"
+
+if st.session_state["pantalla_actual"] == "login":
+    login()
+
+elif st.session_state["pantalla_actual"] == "menu":
+    menu()
