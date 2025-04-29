@@ -99,7 +99,7 @@ def menu():
     st.sidebar.image("Logo.png", use_container_width=True)
     st.sidebar.title(f"Hola, {usuario}")
 
-    opciones = st.sidebar.radio("Menú", ["Registrar Ingreso", "Registrar Gasto", "Resumen Mensual", "Resumen Anual", "Editar o Eliminar", "Cerrar Sesión", "Gráficos"])
+    opciones = st.sidebar.radio("Menú", ["Registrar Ingreso", "Registrar Gasto", "Resumen Mensual", "Resumen Anual", "Editar o Eliminar", "Cerrar Sesión"])
 
     if opciones == "Registrar Ingreso":
         st.header("Registrar un ingreso")
@@ -232,24 +232,10 @@ def menu():
                     st.success("Registro eliminado exitosamente.")
                     st.rerun()
 
-    if opciones == "Gráficos":
-        st.header("Gráficos")
-        df_mes = datos.copy()
-        df_mes["fecha"] = pd.to_datetime(df_mes["fecha"], errors="coerce")
-        df_mes = df_mes.dropna(subset=["fecha"])
-        df_mes["mes"] = df_mes["fecha"].dt.month
-        df_mes["año"] = df_mes["fecha"].dt.year
-
-        ingresos_mes = df_mes[df_mes["tipo"] == "Ingreso"].groupby(["año", "mes"])["monto"].sum().reset_index()
-        gastos_mes = df_mes[df_mes["tipo"] == "Gasto"].groupby(["año", "mes"])["monto"].sum().reset_index()
-
-        ingresos_mes["tipo"] = "Ingreso"
-        gastos_mes["tipo"] = "Gasto"
-
-        df_plot = pd.concat([ingresos_mes, gastos_mes])
-        pivot = df_plot.pivot_table(values="monto", index=["año", "mes"], columns="tipo", fill_value=0)
-
-        st.line_chart(pivot)
+    if opciones == "Cerrar Sesión":
+        st.session_state["sesion_iniciada"] = False
+        st.session_state["usuario_actual"] = ""
+        st.success("Sesión cerrada.")
 
 # ---------- APP ----------
 if "sesion_iniciada" not in st.session_state:
