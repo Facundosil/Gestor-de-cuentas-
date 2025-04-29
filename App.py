@@ -208,13 +208,11 @@ def menu():
 
             if accion == "Editar":
                 registro = datos.iloc[indice]
-                tipo = st.selectbox("Tipo", ["Ingreso", "Gasto"], index=0 if registro["tipo"]=="Ingreso" else 1)
-                subtipo = st.text_input("Subtipo", value=registro["subtipo"])
-                fecha = st.date_input("Fecha", value=pd.to_datetime(registro["fecha"]))
-                monto = st.number_input("Monto", value=float(registro["monto"]))
+                tipo = st.selectbox("Tipo", ["Ingreso", "Gasto"], index=["Ingreso", "Gasto"].index(registro["tipo"]))
+                subtipo = st.selectbox("Subtipo", ["Fijo", "Variable"] if tipo == "Ingreso" else ["Tarjeta", "Débito Automático", "Gasto Vario"], index=["Fijo", "Variable", "Tarjeta", "Débito Automático", "Gasto Vario"].index(registro["subtipo"]))
+                fecha = st.date_input("Fecha", value=registro["fecha"])
+                monto = st.number_input("Monto", min_value=0.0, format="%.2f", value=registro["monto"])
                 referencia = st.text_input("Referencia", value=registro["referencia"])
-                cuotas = st.number_input("Cuotas", value=int(registro["cuotas"]), min_value=1)
-                dolares = st.checkbox("¿En dólares?", value=registro["dolares"])
 
                 if st.button("Guardar Cambios"):
                     datos.at[indice, "tipo"] = tipo
@@ -222,47 +220,34 @@ def menu():
                     datos.at[indice, "fecha"] = fecha
                     datos.at[indice, "monto"] = monto
                     datos.at[indice, "referencia"] = referencia
-                    datos.at[indice, "cuotas"] = cuotas
-                    datos.at[indice, "dolares"] = dolares
                     guardar_datos_csv(datos, nombre_archivo_usuario)
                     st.success("Registro actualizado exitosamente.")
-                    st.rerun()
 
             if accion == "Eliminar":
                 if st.button("Eliminar Registro"):
-                    datos = datos.drop(datos.index[indice]).reset_index(drop=True)
+                    datos = datos.drop(indice)
                     guardar_datos_csv(datos, nombre_archivo_usuario)
                     st.success("Registro eliminado exitosamente.")
-                    st.rerun()
-        else:
-            st.info("No hay registros para mostrar.")
 
     if opciones == "Gráficos":
-        st.header("Gráficos")
-        df = datos.copy()
-        df["fecha"] = pd.to_datetime(df["fecha"], errors="coerce")
-        df = df.dropna(subset=["fecha"])
-        df["mes"] = df["fecha"].dt.month
-        df["año"] = df["fecha"].dt.year
-
-        df_ingresos = df[df["tipo"] == "Ingreso"].groupby(["año", "mes"])["monto"].sum().reset_index()
-        df_gastos = df[df["tipo"] == "Gasto"].groupby(["año", "mes"])["monto"].sum().reset_index()
-
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_ingresos["mes"], df_ingresos["monto"], label="Ingresos", marker="o")
-        ax.plot(df_gastos["mes"], df_gastos["monto"], label="Gastos", marker="o")
-        ax.set_title("Ingresos vs Gastos Mensuales")
-        ax.set_xlabel("Mes")
-        ax.set_ylabel("Monto ($)")
-        ax.legend()
-        st.pyplot(fig)
+        st.header("Gráficos de Finanzas")
+        if not datos.empty:
+            # Cálculos para gráficos
+            resumen = datos.groupby(["tipo"]).sum()["monto"]
+            fig, ax = plt.subplots()
+            ax.pie(resumen, labels=resumen.index, autopct='%1.1f%%', startangle=90)
+            st.pyplot(fig)
 
     if opciones == "Cerrar Sesión":
-        st.session_state.clear()
-        st.rerun()
+        st.session_state["sesion_iniciada"] = False
+        st.session_state["usuario_actual"] = None
+        st.success("Sesión cerrada con éxito.")
 
-# ---------- FLUJO PRINCIPAL ----------
-if not st.session_state.get("sesion_iniciada", False):
+# ---------- PANTALLA DE LOGIN O MENÚ ----------
+if "sesion_iniciada" not in st.session_state:
+    st.session_state["sesion_iniciada"] = False
+
+if not st.session_state["sesion_iniciada"]:
     if login():
         menu()
 else:
