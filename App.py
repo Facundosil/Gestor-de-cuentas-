@@ -3,7 +3,6 @@ import pandas as pd
 import os
 import requests
 from datetime import datetime
-import time
 
 # ---------- CONFIGURACIÓN DE PÁGINA ----------
 st.set_page_config(page_title="Gestor de Cuentas Personales - Bolso Company", layout="wide")
@@ -235,7 +234,6 @@ def menu():
 
     if opciones == "Gráficos":
         st.header("Gráficos")
-        st.subheader("Gastos e ingresos por mes")
         df_mes = datos.copy()
         df_mes["fecha"] = pd.to_datetime(df_mes["fecha"], errors="coerce")
         df_mes = df_mes.dropna(subset=["fecha"])
@@ -249,7 +247,6 @@ def menu():
         gastos_mes["tipo"] = "Gasto"
 
         df_plot = pd.concat([ingresos_mes, gastos_mes])
-
         pivot = df_plot.pivot_table(values="monto", index=["año", "mes"], columns="tipo", fill_value=0)
 
         st.line_chart(pivot)
