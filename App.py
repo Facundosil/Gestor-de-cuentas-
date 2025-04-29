@@ -220,19 +220,18 @@ def menu():
                     datos.at[indice, "dolares"] = dolares
                     guardar_datos_csv(datos, nombre_archivo_usuario)
                     st.success("Registro actualizado exitosamente.")
-                    st.session_state["pantalla_actual"] = "menu"  # Cambiar el estado para que se muestre el menú
 
             if accion == "Eliminar":
                 if st.button("Eliminar Registro"):
                     datos = datos.drop(datos.index[indice]).reset_index(drop=True)
                     guardar_datos_csv(datos, nombre_archivo_usuario)
                     st.success("Registro eliminado exitosamente.")
-                    st.session_state["pantalla_actual"] = "menu"  # Cambiar el estado para que se muestre el menú
 
     if opciones == "Cerrar Sesión":
         st.session_state["sesion_iniciada"] = False
         st.session_state["usuario_actual"] = ""
-        st.session_state["pantalla_actual"] = "login"  # Cambiar el estado a la pantalla de login
+        st.session_state["pantalla_actual"] = "login"
+        st.experimental_rerun()  # Vuelve al login después de cerrar sesión
 
 # ---------- FLUJO DE PÁGINAS ----------
 if "sesion_iniciada" not in st.session_state:
@@ -244,3 +243,4 @@ if st.session_state["pantalla_actual"] == "login":
     login()
 elif st.session_state["pantalla_actual"] == "menu":
     menu()
+
