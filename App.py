@@ -78,17 +78,14 @@ def login():
 
         if st.button("Iniciar sesión"):
             if ((usuarios["usuario"] == usuario) & (usuarios["contraseña"] == contraseña)).any():
-                st.success("Inicio de sesión exitoso.")
                 st.session_state["sesion_iniciada"] = True
                 st.session_state["usuario_actual"] = usuario
-
                 if recordar:
                     guardar_credenciales_guardadas(usuario, contraseña)
-
-                return True
+                st.success("Inicio de sesión exitoso.")
+                st.experimental_rerun()  # Fuerza la recarga de la página para que se actualice el estado
             else:
                 st.error("Usuario o contraseña incorrectos.")
-    return False
 
 # ---------- MENÚ PRINCIPAL ----------
 def menu():
@@ -223,19 +220,20 @@ def menu():
                     datos.at[indice, "dolares"] = dolares
                     guardar_datos_csv(datos, nombre_archivo_usuario)
                     st.success("Registro actualizado exitosamente.")
-                    st.rerun()
+                    st.experimental_rerun()
 
             if accion == "Eliminar":
                 if st.button("Eliminar Registro"):
                     datos = datos.drop(datos.index[indice]).reset_index(drop=True)
                     guardar_datos_csv(datos, nombre_archivo_usuario)
                     st.success("Registro eliminado exitosamente.")
-                    st.rerun()
+                    st.experimental_rerun()
 
     if opciones == "Cerrar Sesión":
         st.session_state["sesion_iniciada"] = False
         st.session_state["usuario_actual"] = ""
         st.success("Sesión cerrada.")
+        st.experimental_rerun()  # Regresar al inicio de sesión
 
 # ---------- APP ----------
 if "sesion_iniciada" not in st.session_state:
