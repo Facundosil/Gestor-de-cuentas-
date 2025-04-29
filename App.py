@@ -3,7 +3,6 @@ import pandas as pd
 import os
 import requests
 from datetime import datetime
-import matplotlib.pyplot as plt
 import time
 
 # ---------- CONFIGURACIÓN DE PÁGINA ----------
@@ -246,24 +245,20 @@ def menu():
         ingresos_mes = df_mes[df_mes["tipo"] == "Ingreso"].groupby(["año", "mes"])["monto"].sum().reset_index()
         gastos_mes = df_mes[df_mes["tipo"] == "Gasto"].groupby(["año", "mes"])["monto"].sum().reset_index()
 
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(ingresos_mes["mes"], ingresos_mes["monto"], label="Ingresos", color="green", marker="o")
-        ax.plot(gastos_mes["mes"], gastos_mes["monto"], label="Gastos", color="red", marker="o")
-        ax.set_xlabel("Mes")
-        ax.set_ylabel("Monto ($)")
-        ax.set_title("Ingresos vs Gastos por Mes")
-        ax.legend()
-        st.pyplot(fig)
+        ingresos_mes["tipo"] = "Ingreso"
+        gastos_mes["tipo"] = "Gasto"
 
-    if opciones == "Cerrar Sesión":
-        del st.session_state["sesion_iniciada"]
-        del st.session_state["usuario_actual"]
-        st.success("Has cerrado sesión correctamente.")
-        st.experimental_rerun()
+        df_plot = pd.concat([ingresos_mes, gastos_mes])
 
-# ---------- FLUJO PRINCIPAL ----------
+        pivot = df_plot.pivot_table(values="monto", index=["año", "mes"], columns="tipo", fill_value=0)
+
+        st.line_chart(pivot)
+
+# ---------- APP ----------
 if "sesion_iniciada" not in st.session_state:
-    if login():
-        menu()
-else:
+    st.session_state["sesion_iniciada"] = False
+
+if st.session_state["sesion_iniciada"]:
     menu()
+else:
+    login()
