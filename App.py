@@ -3,12 +3,11 @@ import pandas as pd
 import os
 import requests
 from datetime import datetime
-from streamlit_autorefresh import st_autorefresh
 import matplotlib.pyplot as plt
+import time
 
 # ---------- CONFIGURACIÓN DE PÁGINA ----------
 st.set_page_config(page_title="Gestor de Cuentas Personales - Bolso Company", layout="wide")
-st_autorefresh(interval=9 * 60 * 1000, key="refresh")  # Refresca cada 9 minutos
 
 # ---------- FUNCIONES AUXILIARES ----------
 def cargar_datos_csv(nombre_archivo):
@@ -234,26 +233,25 @@ def menu():
                     guardar_datos_csv(datos, nombre_archivo_usuario)
                     st.success("Registro eliminado exitosamente.")
                     st.rerun()
-        else:
-            st.info("No hay registros para mostrar.")
 
     if opciones == "Gráficos":
         st.header("Gráficos")
-        df = datos.copy()
-        df["fecha"] = pd.to_datetime(df["fecha"], errors="coerce")
-        df = df.dropna(subset=["fecha"])
-        df["mes"] = df["fecha"].dt.month
-        df["año"] = df["fecha"].dt.year
+        st.subheader("Gastos e ingresos por mes")
+        df_mes = datos.copy()
+        df_mes["fecha"] = pd.to_datetime(df_mes["fecha"], errors="coerce")
+        df_mes = df_mes.dropna(subset=["fecha"])
+        df_mes["mes"] = df_mes["fecha"].dt.month
+        df_mes["año"] = df_mes["fecha"].dt.year
 
-        df_ingresos = df[df["tipo"] == "Ingreso"].groupby(["año", "mes"])["monto"].sum().reset_index()
-        df_gastos = df[df["tipo"] == "Gasto"].groupby(["año", "mes"])["monto"].sum().reset_index()
+        ingresos_mes = df_mes[df_mes["tipo"] == "Ingreso"].groupby(["año", "mes"])["monto"].sum().reset_index()
+        gastos_mes = df_mes[df_mes["tipo"] == "Gasto"].groupby(["año", "mes"])["monto"].sum().reset_index()
 
         fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(df_ingresos["mes"], df_ingresos["monto"], label="Ingresos", marker="o")
-        ax.plot(df_gastos["mes"], df_gastos["monto"], label="Gastos", marker="o")
-        ax.set_title("Ingresos vs Gastos Mensuales")
+        ax.plot(ingresos_mes["mes"], ingresos_mes["monto"], label="Ingresos", color="green", marker="o")
+        ax.plot(gastos_mes["mes"], gastos_mes["monto"], label="Gastos", color="red", marker="o")
         ax.set_xlabel("Mes")
         ax.set_ylabel("Monto ($)")
+        ax.set_title("Ingresos vs Gastos por Mes")
         ax.legend()
         st.pyplot(fig)
 
@@ -269,4 +267,3 @@ if "sesion_iniciada" not in st.session_state:
         menu()
 else:
     menu()
-
