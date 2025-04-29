@@ -3,7 +3,6 @@ import pandas as pd
 import os
 import requests
 from datetime import datetime
-from streamlit_autorefresh import st_autorefresh
 import matplotlib.pyplot as plt
 
 # ---------- CONFIGURACIÓN DE PÁGINA ----------
