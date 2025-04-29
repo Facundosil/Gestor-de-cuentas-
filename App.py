@@ -210,7 +210,7 @@ def menu():
                 cuotas = st.number_input("Cuotas", value=int(registro["cuotas"]), min_value=1)
                 dolares = st.checkbox("¿En dólares?", value=registro["dolares"])
 
-                if st.button("Guardar Cambios"):
+                if st.button("Guardar cambios"):
                     datos.at[indice, "tipo"] = tipo
                     datos.at[indice, "subtipo"] = subtipo
                     datos.at[indice, "fecha"] = fecha
@@ -219,28 +219,15 @@ def menu():
                     datos.at[indice, "cuotas"] = cuotas
                     datos.at[indice, "dolares"] = dolares
                     guardar_datos_csv(datos, nombre_archivo_usuario)
-                    st.success("Registro actualizado exitosamente.")
+                    st.success("Registro modificado exitosamente.")
 
             if accion == "Eliminar":
-                if st.button("Eliminar Registro"):
-                    datos = datos.drop(datos.index[indice]).reset_index(drop=True)
+                if st.button("Eliminar registro"):
+                    datos = datos.drop(indice)
                     guardar_datos_csv(datos, nombre_archivo_usuario)
                     st.success("Registro eliminado exitosamente.")
 
     if opciones == "Cerrar Sesión":
         st.session_state["sesion_iniciada"] = False
-        st.session_state["usuario_actual"] = ""
-        st.session_state["pantalla_actual"] = "login"
-        st.experimental_rerun()  # Vuelve al login después de cerrar sesión
-
-# ---------- FLUJO DE PÁGINAS ----------
-if "sesion_iniciada" not in st.session_state:
-    st.session_state["sesion_iniciada"] = False
-if "pantalla_actual" not in st.session_state:
-    st.session_state["pantalla_actual"] = "login"
-
-if st.session_state["pantalla_actual"] == "login":
-    login()
-elif st.session_state["pantalla_actual"] == "menu":
-    menu()
-
+        st.session_state["pantalla_actual"] = "login"  # Cambiar el estado a la pantalla de login
+        st.success("Has cerrado sesión.")
